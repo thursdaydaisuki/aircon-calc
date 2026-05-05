@@ -133,7 +133,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
       <hr class="divider">
       <div class="result-row"><span style="font-size:15px;font-weight:500;">合計（税込）</span><span class="rt" id="r-total">0円</span></div>
       <div id="r-saving-row" class="saving-row" style="display:none;">
-        <span class="rl">順番最適化による節約（税抜）</span>
+        <span class="rl">順番最適化による値引き（税抜）</span>
         <span id="r-saving" style="font-size:14px;font-weight:500;color:#3B6D11;"></span>
       </div>
     </div>
@@ -267,7 +267,7 @@ function updateCalc() {
   if(ak.length>1){
     const diff=worstOrder().total-sub;
     const sr=document.getElementById('r-saving-row');
-    if(diff>0){sr.style.display='flex';document.getElementById('r-saving').textContent='最大 '+fmt(diff)+' の節約';}
+    if(diff>0){sr.style.display='flex';document.getElementById('r-saving').textContent='最大 '+fmt(diff)+' の値引き額';}
     else sr.style.display='none';
   } else document.getElementById('r-saving-row').style.display='none';
 
