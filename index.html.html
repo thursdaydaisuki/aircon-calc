@@ -3,30 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>エアコンキャンペーン 料金ツール</title>
+<title>エアコンキャンペーン 料金計算ツール</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; padding: 1.5rem 1rem; }
 .wrap { max-width: 740px; margin: 0 auto; }
 .page-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
 .page-sub { font-size: 13px; color: #888780; margin-bottom: 1.25rem; }
-.tab-bar { display: flex; gap: 6px; margin-bottom: 1.25rem; }
-.tab-btn { padding: 7px 18px; font-size: 14px; font-weight: 500; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #888; cursor: pointer; transition: background 0.15s; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
+.tab-bar { display: flex; gap: 6px; }
+.tab-btn { padding: 7px 18px; font-size: 14px; font-weight: 500; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #888; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .tab-btn.active { background: #E6F1FB; color: #0C447C; border-color: #85B7EB; }
+.mode-toggle { display: flex; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+.mode-btn { padding: 7px 14px; font-size: 13px; font-weight: 500; border: none; background: #fff; color: #888; cursor: pointer; }
+.mode-btn.active.campaign { background: #185FA5; color: #fff; }
+.mode-btn.active.normal { background: #555552; color: #fff; }
 .section { display: none; }
 .section.active { display: block; }
-
-/* --- 計算タブ --- */
 .card { background: #fff; border: 1px solid #e8e8e6; border-radius: 12px; padding: 1.25rem; margin-bottom: 12px; }
 .group-label { font-size: 11px; font-weight: 500; color: #888780; letter-spacing: 0.04em; padding: 6px 0 4px; margin-top: 4px; border-bottom: 1px solid #eee; margin-bottom: 2px; }
-.plan-row { display: grid; grid-template-columns: 2fr 110px 90px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0ee; }
+.plan-row { display: grid; grid-template-columns: 2fr 110px 90px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
 .plan-row:last-child { border-bottom: none; }
 .plan-name { font-size: 14px; font-weight: 500; color: #1a1a18; }
-.plan-sub { font-size: 11px; color: #888780; margin-top: 1px; }
+.plan-price { font-size: 11px; color: #888780; margin-top: 2px; }
 .qty-ctrl { display: flex; align-items: center; gap: 5px; }
-.qty-btn { width: 30px; height: 30px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.qty-btn { width: 28px; height: 28px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
 .qty-btn:active { background: #f0f0ee; }
-.qty-num { font-size: 15px; font-weight: 500; min-width: 20px; text-align: center; }
+.qty-num { font-size: 15px; font-weight: 500; min-width: 18px; text-align: center; }
 .plan-subtotal { font-size: 13px; font-weight: 500; text-align: right; color: #1a1a18; }
 .best-box { background: #EAF3DE; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
 .best-title { font-size: 13px; font-weight: 500; color: #27500A; margin-bottom: 8px; }
@@ -37,86 +40,85 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
 .result-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
 .rl { font-size: 13px; color: #888780; }
 .rv { font-size: 14px; color: #1a1a18; }
-.rt { font-size: 24px; font-weight: 500; color: #185FA5; }
+.rt { font-size: 22px; font-weight: 500; color: #185FA5; }
 .divider { border: none; border-top: 1px solid #e0e0de; margin: 7px 0; }
-.saving-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: 8px; margin-top: 4px; border-top: 1px solid #e0e0de; }
+.saving-row { display: flex; justify-content: space-between; padding-top: 8px; margin-top: 4px; border-top: 1px solid #e0e0de; }
 .reset-btn { display: block; margin: 10px 0 0 auto; padding: 6px 16px; font-size: 13px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #666; cursor: pointer; }
-
-/* --- 早見表タブ --- */
-.hint-box { background: #E6F1FB; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: #185FA5; line-height: 1.6; }
-.priority-box { background: #fff; border: 1px solid #e8e8e6; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 14px; }
+.hint-box { border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
+.hint-campaign { background: #E6F1FB; color: #185FA5; }
+.hint-normal { background: #f0f0ee; color: #555552; }
+.priority-box { background: #fff; border: 1px solid #e8e8e6; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
 .priority-title { font-size: 13px; font-weight: 500; color: #1a1a18; margin-bottom: 8px; }
 .priority-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #888780; margin-bottom: 5px; }
 .priority-row:last-child { margin-bottom: 0; }
 .pnum { width: 20px; height: 20px; border-radius: 50%; background: #E6F1FB; color: #0C447C; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .scroll-wrap { overflow-x: auto; }
-.htable { border-collapse: collapse; font-size: 13px; width: 100%; min-width: 540px; }
-.htable th { padding: 8px 10px; background: #f5f5f3; color: #888780; font-weight: 500; text-align: center; border: 1px solid #e8e8e6; white-space: nowrap; }
-.htable th.left { text-align: left; }
-.htable td { padding: 0; border: 1px solid #e8e8e6; vertical-align: middle; }
-.htable td.plan-cell { padding: 0 10px; }
-.cell-inner { display: flex; flex-direction: column; }
-.cell-unit { font-size: 13px; color: #1a1a18; padding: 5px 10px 3px; border-bottom: 1px dashed #e8e8e6; }
-.cell-total { font-size: 12px; color: #888780; padding: 3px 10px 5px; background: #fafaf8; }
-.cell-unit.hl { background: #EAF3DE; color: #27500A; font-weight: 500; }
-.cell-total.hl { background: #d6ecc7; color: #3B6D11; }
-.cell-free { font-size: 13px; font-weight: 500; color: #185FA5; padding: 5px 10px 3px; border-bottom: 1px dashed #e8e8e6; background: #EAF3DE; }
-.cell-free-total { font-size: 12px; color: #3B6D11; padding: 3px 10px 5px; background: #d6ecc7; }
-.plan-name-cell { font-size: 13px; font-weight: 500; color: #1a1a18; }
-.plan-desc-cell { font-size: 11px; color: #888780; margin-top: 1px; }
-.group-row td { background: #f0f0ee; font-size: 11px; font-weight: 500; color: #888780; padding: 4px 10px; letter-spacing: 0.04em; }
-.tax { font-size: 10px; color: #aaa; }
+.htable { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
+.htable th { padding: 6px 7px; background: #f5f5f3; color: #888780; font-weight: 500; text-align: right; border-bottom: 1px solid #e0e0de; white-space: nowrap; }
+.htable th:first-child { text-align: left; }
+.htable td { padding: 6px 7px; text-align: right; border-bottom: 1px solid #eee; color: #1a1a18; font-size: 12px; }
+.htable td:first-child { text-align: left; color: #888780; white-space: nowrap; }
+.htable tr:last-child td { border-bottom: none; }
+.htable .tax { font-size: 10px; color: #aaa; display: block; }
+.htable .hl { background: #EAF3DE; }
+.htable .hl .mv { color: #27500A; font-weight: 500; }
+.htable .sep td { border-top: 2px solid #e0e0de; }
+.group-head td { background: #f5f5f3; font-size: 11px; font-weight: 500; color: #888780; padding: 4px 7px; }
+.same-badge { font-size: 10px; background: #f0f0ee; color: #888; border-radius: 4px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
 .note { font-size: 12px; color: #888780; margin-top: 10px; }
-
 @media (max-width: 480px) {
-  .plan-row { grid-template-columns: 1.5fr 1fr auto; }
-  .plan-sub { display: none; }
+  .plan-row { grid-template-columns: 1.6fr 100px 80px; }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p class="page-title">エアコンキャンペーン 料金ツール</p>
-  <p class="page-sub">スタッフ向け — 最安計算・早見表</p>
+  <p class="page-title">エアコンキャンペーン 料金計算ツール</p>
+  <p class="page-sub">スタッフ向け — 台数を入力すると最安の計算順序と合計金額が出ます</p>
 
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('calc',this)">最安計算</button>
-    <button class="tab-btn" onclick="switchTab('hayami',this)">早見表</button>
+  <div class="top-bar">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('calc',this)">料金計算</button>
+      <button class="tab-btn" onclick="switchTab('hayami',this)">早見表</button>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active campaign" id="btn-cp" onclick="setMode('campaign')">🎯 キャンペーン</button>
+      <button class="mode-btn" id="btn-nm" onclick="setMode('normal')">通常</button>
+    </div>
   </div>
 
-  <!-- 計算タブ -->
   <div id="calc" class="section active">
     <div class="card">
       <div class="group-label">家庭用</div>
       <div class="plan-row">
-        <div><div class="plan-name">プランA</div><div class="plan-sub">壁掛け・壁埋込・床置き　1台目12,000 / 2台目8,000 / 3台目〜7,000</div></div>
+        <div><div class="plan-name">壁掛け・壁埋込・床置き</div><div class="plan-price" id="pl-A"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('A',-1)">−</button><span class="qty-num" id="qty-A">0</span><button class="qty-btn" onclick="change('A',1)">+</button></div>
         <div class="plan-subtotal" id="sub-A">−</div>
       </div>
       <div class="plan-row">
-        <div><div class="plan-name">プランB</div><div class="plan-sub">ロボット付き壁掛け　1台目22,000 / 2台目18,000 / 3台目〜17,000</div></div>
+        <div><div class="plan-name">ロボット付き壁掛け</div><div class="plan-price" id="pl-B"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('B',-1)">−</button><span class="qty-num" id="qty-B">0</span><button class="qty-btn" onclick="change('B',1)">+</button></div>
         <div class="plan-subtotal" id="sub-B">−</div>
       </div>
       <div class="plan-row">
-        <div><div class="plan-name">プランC</div><div class="plan-sub">天カセ（家庭用）　1台目25,000 / 2台目〜20,000</div></div>
+        <div><div class="plan-name">天カセ（家庭用）<span class="same-badge" id="badge-C"></span></div><div class="plan-price" id="pl-C"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('C',-1)">−</button><span class="qty-num" id="qty-C">0</span><button class="qty-btn" onclick="change('C',1)">+</button></div>
         <div class="plan-subtotal" id="sub-C">−</div>
       </div>
       <div class="group-label" style="margin-top:8px;">業務用</div>
       <div class="plan-row">
-        <div><div class="plan-name">プランD</div><div class="plan-sub">天カセ・天つり・ビルトイン　1台目35,000 / 2台目〜30,000</div></div>
+        <div><div class="plan-name">天カセ・天つり・ビルトイン<span class="same-badge" id="badge-D"></span></div><div class="plan-price" id="pl-D"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('D',-1)">−</button><span class="qty-num" id="qty-D">0</span><button class="qty-btn" onclick="change('D',1)">+</button></div>
         <div class="plan-subtotal" id="sub-D">−</div>
       </div>
       <div class="plan-row">
-        <div><div class="plan-name">プランE</div><div class="plan-sub">床置き（業務用）　1台目15,000 / 2台目〜13,000</div></div>
+        <div><div class="plan-name">床置き（業務用）<span class="same-badge" id="badge-E"></span></div><div class="plan-price" id="pl-E"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('E',-1)">−</button><span class="qty-num" id="qty-E">0</span><button class="qty-btn" onclick="change('E',1)">+</button></div>
         <div class="plan-subtotal" id="sub-E">−</div>
       </div>
       <div class="group-label" style="margin-top:8px;">共通</div>
       <div class="plan-row" style="border-bottom:none;">
-        <div><div class="plan-name">室外機</div><div class="plan-sub">1台目無料 / 2台目以降 3,000円（税抜）</div></div>
+        <div><div class="plan-name">室外機</div><div class="plan-price" id="pl-OUT"></div></div>
         <div class="qty-ctrl"><button class="qty-btn" onclick="change('OUT',-1)">−</button><span class="qty-num" id="qty-OUT">0</span><button class="qty-btn" onclick="change('OUT',1)">+</button></div>
         <div class="plan-subtotal" id="sub-OUT">−</div>
       </div>
@@ -133,204 +135,193 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragin
       <hr class="divider">
       <div class="result-row"><span style="font-size:15px;font-weight:500;">合計（税込）</span><span class="rt" id="r-total">0円</span></div>
       <div id="r-saving-row" class="saving-row" style="display:none;">
-        <span class="rl">順番最適化による値引き（税抜）</span>
+        <span class="rl">順番最適化による節約（税抜）</span>
         <span id="r-saving" style="font-size:14px;font-weight:500;color:#3B6D11;"></span>
       </div>
     </div>
     <button class="reset-btn" onclick="resetAll()">リセット</button>
   </div>
 
-  <!-- 早見表タブ -->
   <div id="hayami" class="section">
-    <div class="priority-box">
-      <div class="priority-title">複数台の場合、優先する順番</div>
-      <div class="priority-row"><div class="pnum">1</div><span><strong style="color:#1a1a18;">プランD</strong>　天カセ・天つり・ビルトイン（下がり幅最大）</span></div>
-      <div class="priority-row"><div class="pnum">2</div><span><strong style="color:#1a1a18;">プランC</strong>　天カセ（家庭用）</span></div>
-      <div class="priority-row"><div class="pnum">3</div><span><strong style="color:#1a1a18;">プランB</strong>　ロボット付き壁掛け</span></div>
-      <div class="priority-row"><div class="pnum">4</div><span><strong style="color:#1a1a18;">プランE</strong>　床置き（業務用）</span></div>
-      <div class="priority-row"><div class="pnum">5</div><span><strong style="color:#1a1a18;">プランA</strong>　壁掛け・壁埋込・床置き</span></div>
-      <div style="margin-top:8px;font-size:12px;color:#888780;">高単価・下がり幅の大きいプランを先に計算すると合計が安くなります。</div>
+    <div class="hint-box hint-campaign" id="hint-cp">🎯 キャンペーン価格。複数台は高単価プランから先に計算すると最安になります。</div>
+    <div class="hint-box hint-normal" id="hint-nm" style="display:none;">通常価格。天カセ・天つり・ビルトイン・床置き業務用はキャンペーンと同額。室外機は1台目から5,500円（税抜）。壁掛け系のみ2台目以降で単価が変わります。</div>
+
+    <div class="priority-box" id="priority-cp">
+      <div class="priority-title">複数台の場合、優先する順番（最安になる順）</div>
+      <div class="priority-row"><div class="pnum">1</div><span><strong style="color:#1a1a18;">天カセ・天つり・ビルトイン</strong>　35,000 → 30,000円（下がり幅最大）</span></div>
+      <div class="priority-row"><div class="pnum">2</div><span><strong style="color:#1a1a18;">天カセ（家庭用）</strong>　25,000 → 20,000円</span></div>
+      <div class="priority-row"><div class="pnum">3</div><span><strong style="color:#1a1a18;">ロボット付き壁掛け</strong>　22,000 → 18,000 → 17,000円</span></div>
+      <div class="priority-row"><div class="pnum">4</div><span><strong style="color:#1a1a18;">床置き（業務用）</strong>　15,000 → 13,000円</span></div>
+      <div class="priority-row"><div class="pnum">5</div><span><strong style="color:#1a1a18;">壁掛け・壁埋込・床置き</strong>　12,000 → 8,000 → 7,000円</span></div>
+      <div style="margin-top:8px;font-size:12px;color:#888780;">高単価・下がり幅の大きいプランを先に計算することで、後続台数の単価が下がり合計が安くなります。</div>
     </div>
-    <div class="hint-box">上段：1台あたりの単価（緑＝前の台より安くなる）／ 下段：その台数までの累計合計。単価・合計ともに税抜、（）は税込。</div>
+    <div class="priority-box" id="priority-nm" style="display:none;">
+      <div class="priority-title">通常料金でキャンペーンと異なる点</div>
+      <div class="priority-row"><div class="pnum" style="background:#e8e8e6;color:#555;">△</div><span><strong style="color:#1a1a18;">壁掛け・壁埋込・床置き</strong>　1台目12,000 / 2台目以降8,000円（3台目〜も8,000円）</span></div>
+      <div class="priority-row"><div class="pnum" style="background:#e8e8e6;color:#555;">△</div><span><strong style="color:#1a1a18;">ロボット付き壁掛け</strong>　1台目22,000 / 2台目以降18,000円（3台目〜も18,000円）</span></div>
+      <div class="priority-row"><div class="pnum" style="background:#e8e8e6;color:#555;">△</div><span><strong style="color:#1a1a18;">室外機</strong>　1台目から5,500円（一律）</span></div>
+      <div class="priority-row"><div class="pnum" style="background:#EAF3DE;color:#3B6D11;">＝</div><span>天カセ・天つり・ビルトイン・床置き業務用　キャンペーンと同額</span></div>
+    </div>
+
     <div class="scroll-wrap">
-      <table class="htable">
-        <thead>
-          <tr>
-            <th class="left">プラン</th>
-            <th class="left">種別</th>
-            <th>1台目</th><th>2台目</th><th>3台目</th><th>4台目</th><th>5台目</th>
-          </tr>
-        </thead>
-        <tbody id="htbody"></tbody>
-      </table>
+    <table class="htable">
+      <thead>
+        <tr>
+          <th>種別</th>
+          <th>1台目単価</th>
+          <th>2台目単価</th>
+          <th>3台目〜単価</th>
+          <th>2台合計</th>
+          <th>3台合計</th>
+          <th>4台合計</th>
+          <th>5台合計</th>
+        </tr>
+      </thead>
+      <tbody id="htbody"></tbody>
+    </table>
     </div>
-    <p class="note">室外機は別途。上段：単価 / 下段：累計合計。緑は前台より単価が下がるタイミング。</p>
+    <p class="note">上段：税抜 / 下段（）：税込。緑セルは単価が下がるタイミング。</p>
   </div>
 </div>
 
 <script>
-const PLANS = [
-  { key:'A', type:'家庭用', desc:'壁掛け・壁埋込・床置き',     r:[12000,8000,7000,7000,7000] },
-  { key:'B', type:'家庭用', desc:'ロボット付き壁掛け',         r:[22000,18000,17000,17000,17000] },
-  { key:'C', type:'家庭用', desc:'天カセ（家庭用）',           r:[25000,20000,20000,20000,20000] },
-  { key:'D', type:'業務用', desc:'天カセ・天つり・ビルトイン', r:[35000,30000,30000,30000,30000] },
-  { key:'E', type:'業務用', desc:'床置き（業務用）',           r:[15000,13000,13000,13000,13000] },
-];
+const CP = {
+  A:{ name:'壁掛け・壁埋込・床置き',    type:'家庭用', r1:12000, r2:8000,  r3:7000  },
+  B:{ name:'ロボット付き壁掛け',         type:'家庭用', r1:22000, r2:18000, r3:17000 },
+  C:{ name:'天カセ（家庭用）',           type:'家庭用', r1:25000, r2:20000, r3:20000 },
+  D:{ name:'天カセ・天つり・ビルトイン', type:'業務用', r1:35000, r2:30000, r3:30000 },
+  E:{ name:'床置き（業務用）',           type:'業務用', r1:15000, r2:13000, r3:13000 },
+};
+const NM = {
+  A:{ name:'壁掛け・壁埋込・床置き',    type:'家庭用', r1:12000, r2:8000,  r3:8000  },
+  B:{ name:'ロボット付き壁掛け',         type:'家庭用', r1:22000, r2:18000, r3:18000 },
+  C:{ name:'天カセ（家庭用）',           type:'家庭用', r1:25000, r2:20000, r3:20000 },
+  D:{ name:'天カセ・天つり・ビルトイン', type:'業務用', r1:35000, r2:30000, r3:30000 },
+  E:{ name:'床置き（業務用）',           type:'業務用', r1:15000, r2:13000, r3:13000 },
+};
+const OUT_CP = { r1:0,    r2:3000 };
+const OUT_NM = { r1:5500, r2:5500 };
+const SAME_AS_CP = { A:false, B:false, C:true, D:true, E:true };
 
-function unitPrice(key, pos) {
-  const p = PLANS.find(x=>x.key===key);
-  return p.r[Math.min(pos-1, p.r.length-1)];
+let mode='campaign', PLANS=CP, OUT=OUT_CP;
+const qty={A:0,B:0,C:0,D:0,E:0,OUT:0};
+
+function labelText(key){
+  const p=PLANS[key];
+  if(p.r1===p.r2&&p.r2===p.r3) return p.r1.toLocaleString()+'円（一律）';
+  if(p.r2===p.r3) return '1台目 '+p.r1.toLocaleString()+' / 2台目以降 '+p.r2.toLocaleString()+'円';
+  return '1台目 '+p.r1.toLocaleString()+' / 2台目 '+p.r2.toLocaleString()+' / 3台目〜 '+p.r3.toLocaleString()+'円';
 }
 
-const qty = {A:0,B:0,C:0,D:0,E:0,OUT:0};
-
-function change(key, delta) {
-  qty[key] = Math.max(0, qty[key]+delta);
-  document.getElementById('qty-'+key).textContent = qty[key];
-  updateCalc();
-}
-function resetAll() {
-  Object.keys(qty).forEach(k=>{qty[k]=0;document.getElementById('qty-'+k).textContent=0;});
-  updateCalc();
-}
-function fmt(n){ return n.toLocaleString('ja-JP')+'円'; }
-
-function calcWithOrder(order) {
-  let pos=0, total=0;
-  const breakdown=[];
-  order.forEach(key=>{
-    const n=qty[key]; if(!n) return;
-    let sub=0;
-    for(let i=0;i<n;i++){pos++;sub+=unitPrice(key,pos);}
-    total+=sub; breakdown.push({key,n,sub});
+function updatePriceLabels(){
+  ['A','B','C','D','E'].forEach(k=>{
+    document.getElementById('pl-'+k).textContent=labelText(k);
+    const b=document.getElementById('badge-'+k);
+    if(b) b.textContent=(mode==='normal'&&SAME_AS_CP[k])?'CP同額':'';
   });
-  const outN=qty.OUT;
-  const outTotal=outN<=1?0:(outN-1)*3000;
-  total+=outTotal;
-  return {total,breakdown,outTotal};
+  document.getElementById('pl-OUT').textContent=mode==='campaign'
+    ?'1台目無料 / 2台目以降 3,000円（税抜）'
+    :'1台目〜 5,500円（税抜・一律）';
 }
 
-function bestOrder() {
-  const ak=PLANS.map(p=>p.key).filter(k=>qty[k]>0);
-  if(!ak.length) return {order:[],total:0,breakdown:[],outTotal:0};
+function setMode(m){
+  mode=m; PLANS=m==='campaign'?CP:NM; OUT=m==='campaign'?OUT_CP:OUT_NM;
+  document.getElementById('btn-cp').className='mode-btn'+(m==='campaign'?' active campaign':'');
+  document.getElementById('btn-nm').className='mode-btn'+(m==='normal'?' active normal':'');
+  updatePriceLabels(); updateCalc(); buildHayami();
+  document.getElementById('hint-cp').style.display=m==='campaign'?'block':'none';
+  document.getElementById('hint-nm').style.display=m==='normal'?'block':'none';
+  document.getElementById('priority-cp').style.display=m==='campaign'?'block':'none';
+  document.getElementById('priority-nm').style.display=m==='normal'?'block':'none';
+}
+
+function unitPrice(key,pos){const p=PLANS[key];return pos===1?p.r1:pos===2?p.r2:p.r3;}
+function outPrice(pos){return pos===1?OUT.r1:OUT.r2;}
+function fmt(n){return n.toLocaleString('ja-JP')+'円';}
+
+function change(key,delta){qty[key]=Math.max(0,qty[key]+delta);document.getElementById('qty-'+key).textContent=qty[key];updateCalc();}
+function resetAll(){Object.keys(qty).forEach(k=>{qty[k]=0;document.getElementById('qty-'+k).textContent=0;});updateCalc();}
+
+function calcWithOrder(order){
+  let pos=0,total=0;const breakdown=[];
+  order.forEach(key=>{const n=qty[key];if(!n)return;let sub=0;for(let i=0;i<n;i++){pos++;sub+=unitPrice(key,pos);}total+=sub;breakdown.push({key,n,sub});});
+  let outTotal=0;for(let i=0;i<qty.OUT;i++)outTotal+=outPrice(i+1);
+  total+=outTotal;return{total,breakdown,outTotal};
+}
+function bestOrder(){
+  const ak=['A','B','C','D','E'].filter(k=>qty[k]>0);
+  if(!ak.length)return{order:[],total:0,breakdown:[],outTotal:0};
   let bestT=Infinity,bestP=ak;
-  function perm(arr,cur){
-    if(cur.length===arr.length){
-      const r=calcWithOrder(cur);
-      if(r.total<bestT){bestT=r.total;bestP=[...cur];}
-      return;
-    }
-    arr.forEach(k=>{if(!cur.includes(k))perm(arr,[...cur,k]);});
-  }
-  perm(ak,[]);
-  return {order:bestP,...calcWithOrder(bestP)};
+  function perm(arr,cur){if(cur.length===arr.length){const r=calcWithOrder(cur);if(r.total<bestT){bestT=r.total;bestP=[...cur];}return;}arr.forEach(k=>{if(!cur.includes(k))perm(arr,[...cur,k]);});}
+  perm(ak,[]);return{order:bestP,...calcWithOrder(bestP)};
+}
+function worstOrder(){
+  const ak=['A','B','C','D','E'].filter(k=>qty[k]>0);
+  if(!ak.length)return{total:0};let worst=0;
+  function perm(arr,cur){if(cur.length===arr.length){const r=calcWithOrder(cur);if(r.total>worst)worst=r.total;return;}arr.forEach(k=>{if(!cur.includes(k))perm(arr,[...cur,k]);});}
+  perm(ak,[]);return{total:worst};
 }
 
-function worstOrder() {
-  const ak=PLANS.map(p=>p.key).filter(k=>qty[k]>0);
-  if(!ak.length) return {total:0};
-  let worst=0;
-  function perm(arr,cur){
-    if(cur.length===arr.length){
-      const r=calcWithOrder(cur);
-      if(r.total>worst)worst=r.total;
-      return;
-    }
-    arr.forEach(k=>{if(!cur.includes(k))perm(arr,[...cur,k]);});
-  }
-  perm(ak,[]);
-  return {total:worst};
-}
-
-function updateCalc() {
-  const ak=PLANS.map(p=>p.key).filter(k=>qty[k]>0);
+function updateCalc(){
+  const ak=['A','B','C','D','E'].filter(k=>qty[k]>0);
   if(!ak.length&&!qty.OUT){
-    PLANS.map(p=>p.key).concat(['OUT']).forEach(k=>document.getElementById('sub-'+k).textContent='−');
-    document.getElementById('r-subtotal').textContent='0円';
-    document.getElementById('r-tax').textContent='0円';
-    document.getElementById('r-total').textContent='0円';
+    ['A','B','C','D','E','OUT'].forEach(k=>document.getElementById('sub-'+k).textContent='−');
+    ['r-subtotal','r-tax','r-total'].forEach(id=>document.getElementById(id).textContent='0円');
     document.getElementById('best-box').style.display='none';
     document.getElementById('r-saving-row').style.display='none';
     return;
   }
   const best=bestOrder();
   const sub=best.total,tax=Math.round(sub*0.1),total=sub+tax;
-  PLANS.map(p=>p.key).forEach(k=>{
-    const f=best.breakdown.find(b=>b.key===k);
-    document.getElementById('sub-'+k).textContent=f?fmt(f.sub):'−';
-  });
-  document.getElementById('sub-OUT').textContent=qty.OUT===0?'−':qty.OUT===1?'無料':fmt(best.outTotal);
+  ['A','B','C','D','E'].forEach(k=>{const f=best.breakdown.find(b=>b.key===k);document.getElementById('sub-'+k).textContent=f?fmt(f.sub):'−';});
+  document.getElementById('sub-OUT').textContent=qty.OUT===0?'−':mode==='campaign'&&qty.OUT===1?'無料':fmt(best.outTotal);
   document.getElementById('r-subtotal').textContent=fmt(sub);
   document.getElementById('r-tax').textContent=fmt(tax);
   document.getElementById('r-total').textContent=fmt(total);
-
-  if(ak.length>1){
+  if(ak.length>1&&mode==='campaign'){
     const diff=worstOrder().total-sub;
     const sr=document.getElementById('r-saving-row');
-    if(diff>0){sr.style.display='flex';document.getElementById('r-saving').textContent='最大 '+fmt(diff)+' の値引き額';}
+    if(diff>0){sr.style.display='flex';document.getElementById('r-saving').textContent='最大 '+fmt(diff)+' の節約';}
     else sr.style.display='none';
   } else document.getElementById('r-saving-row').style.display='none';
-
-  if(ak.length){
+  if(ak.length&&mode==='campaign'){
     document.getElementById('best-box').style.display='block';
     let html='',pos=0;
     best.order.forEach((key,idx)=>{
       const n=qty[key],prices=[];
-      const p=PLANS.find(x=>x.key===key);
       for(let i=0;i<n;i++){pos++;prices.push(unitPrice(key,pos).toLocaleString('ja-JP'));}
-      html+=`<div class="order-step"><div class="step-num">${idx+1}</div><span>プラン${key}（${p.desc}）×${n}台 → ${prices.join(' / ')}円</span></div>`;
+      html+=`<div class="order-step"><div class="step-num">${idx+1}</div><span>${PLANS[key].name} ×${n}台 → ${prices.join(' / ')}円</span></div>`;
     });
     if(qty.OUT>0){
-      html+=`<div class="order-step"><div class="step-num" style="background:#888780;color:#fff;">室</div><span>室外機 ×${qty.OUT}台 → ${qty.OUT===1?'1台目無料':'1台目無料 / 残り'+(qty.OUT-1)+'台×3,000円'}</span></div>`;
+      let op=[];for(let i=0;i<qty.OUT;i++)op.push(i===0?'無料':outPrice(2).toLocaleString()+'円');
+      html+=`<div class="order-step"><div class="step-num" style="background:#888780;color:#f5f5f3;font-size:9px;">室外</div><span>室外機 ×${qty.OUT}台 → ${op.join(' / ')}</span></div>`;
     }
     document.getElementById('best-order').innerHTML=html;
   } else document.getElementById('best-box').style.display='none';
 }
 
 function buildHayami(){
+  const keys=['A','B','C','D','E'];
   let html='',lastType='';
-  PLANS.forEach(p=>{
-    if(p.type!==lastType){
-      html+=`<tr class="group-row"><td colspan="7">${p.type}</td></tr>`;
-      lastType=p.type;
-    }
-    let cum=0,cells='';
-    for(let i=0;i<5;i++){
-      const unit=p.r[i];
-      cum+=unit;
-      const isLower=i>0&&unit<p.r[i-1];
-      const uCls=isLower?'cell-unit hl':'cell-unit';
-      const tCls=isLower?'cell-total hl':'cell-total';
-      cells+=`<td><div class="cell-inner">
-        <div class="${uCls}">${unit.toLocaleString()}<span class="tax"> (${Math.round(unit*1.1).toLocaleString()})</span></div>
-        <div class="${tCls}">計 ${cum.toLocaleString()}<span class="tax"> (${Math.round(cum*1.1).toLocaleString()})</span></div>
-      </div></td>`;
-    }
-    html+=`<tr>
-      <td class="plan-cell"><div class="plan-name-cell">プラン${p.key}</div></td>
-      <td class="plan-cell"><div class="plan-desc-cell">${p.desc}</div></td>
-      ${cells}
-    </tr>`;
+  keys.forEach(key=>{
+    const p=PLANS[key];
+    if(p.type!==lastType){html+=`<tr class="group-head"><td colspan="8">${p.type}</td></tr>`;lastType=p.type;}
+    const cum=n=>{let s=0;for(let i=1;i<=n;i++)s+=unitPrice(key,i);return s;};
+    const isNew2=p.r2<p.r1,isNew3=p.r3<p.r2;
+    const sameTag=(mode==='normal'&&SAME_AS_CP[key])?' <span style="font-size:10px;color:#3B6D11;">(CP同額)</span>':'';
+    const fmtU=(v,hl)=>{const tax=Math.round(v*1.1);return`<td${hl?' class="hl"':''}><span${hl?' class="mv"':''}>${v.toLocaleString()}</span><span class="tax">(${tax.toLocaleString()})</span></td>`;};
+    const fmtC=v=>{const tax=Math.round(v*1.1);return`<td>${v.toLocaleString()}<span class="tax">(${tax.toLocaleString()})</span></td>`;};
+    html+=`<tr><td>${p.name}${sameTag}</td>${fmtU(p.r1,false)}${fmtU(p.r2,isNew2)}${fmtU(p.r3,isNew3)}${fmtC(cum(2))}${fmtC(cum(3))}${fmtC(cum(4))}${fmtC(cum(5))}</tr>`;
   });
-  let cumOut=0,outCells='';
-  for(let i=0;i<5;i++){
-    const unit=i===0?0:3000;
-    cumOut+=unit;
-    if(i===0){
-      outCells+=`<td><div class="cell-inner"><div class="cell-free">無料</div><div class="cell-free-total">計 0</div></div></td>`;
-    } else {
-      outCells+=`<td><div class="cell-inner">
-        <div class="cell-unit">${unit.toLocaleString()}<span class="tax"> (${Math.round(unit*1.1).toLocaleString()})</span></div>
-        <div class="cell-total">計 ${cumOut.toLocaleString()}<span class="tax"> (${Math.round(cumOut*1.1).toLocaleString()})</span></div>
-      </div></td>`;
-    }
-  }
-  html+=`<tr class="group-row"><td colspan="7">共通</td></tr>
-  <tr>
-    <td class="plan-cell"><div class="plan-name-cell">室外機</div></td>
-    <td class="plan-cell"><div class="plan-desc-cell">キャンペーン</div></td>
-    ${outCells}
-  </tr>`;
+  const oc=mode==='campaign';
+  const or1=oc?0:5500,or2=oc?3000:5500;
+  const ocum=n=>{let s=0;for(let i=1;i<=n;i++)s+=i===1?or1:or2;return s;};
+  const fmtC=v=>{const tax=Math.round(v*1.1);return`<td>${v.toLocaleString()}<span class="tax">(${tax.toLocaleString()})</span></td>`;};
+  html+=`<tr class="sep"><td>室外機</td>
+    <td${oc?' class="hl"':''}><span${oc?' class="mv"':''}>${or1===0?'無料':or1.toLocaleString()}</span><span class="tax">(${Math.round(or1*1.1).toLocaleString()})</span></td>
+    <td>${or2.toLocaleString()}<span class="tax">(${Math.round(or2*1.1).toLocaleString()})</span></td>
+    <td>${or2.toLocaleString()}<span class="tax">(${Math.round(or2*1.1).toLocaleString()})</span></td>
+    ${fmtC(ocum(2))}${fmtC(ocum(3))}${fmtC(ocum(4))}${fmtC(ocum(5))}</tr>`;
   document.getElementById('htbody').innerHTML=html;
 }
 
@@ -341,6 +332,7 @@ function switchTab(id,btn){
   btn.classList.add('active');
 }
 
+updatePriceLabels();
 buildHayami();
 updateCalc();
 </script>
